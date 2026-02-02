@@ -1,0 +1,15 @@
+# ix.dev deployment configuration for duck (rio + heat equation)
+[project]
+name = "duck"
+description = "Rio terminal with heat equation RK2 compute tile (clockssugars solver)"
+
+[build]
+dockerfile = "Dockerfile"
+
+[compute]
+name = "duck"
+gpu = true
+
+[env]
+RUST_LOG = "info"
+WGPU_BACKEND = "vulkan"
