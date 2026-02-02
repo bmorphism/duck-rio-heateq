@@ -15,7 +15,11 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 COPY . .
 
-RUN cargo build --release -p rioterm 2>&1 || echo "Build completed (GPU features may require runtime)"
+# Override LTO to avoid OOM in constrained containers
+ENV CARGO_PROFILE_RELEASE_LTO=thin
+ENV CARGO_PROFILE_RELEASE_CODEGEN_UNITS=4
+
+RUN cargo build --release -p rioterm
 
 FROM debian:bookworm-slim
 
