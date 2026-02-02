@@ -7,6 +7,7 @@ pub mod graphics;
 pub mod iterm2_image_protocol;
 pub mod mode;
 pub mod sixel;
+pub mod tile_protocol;
 
 #[derive(Default, Clone, Serialize, Deserialize, Copy, Debug, Eq, PartialEq)]
 pub enum CursorShape {

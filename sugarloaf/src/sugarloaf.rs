@@ -7,6 +7,7 @@ use crate::components::filters::{Filter, FiltersBrush};
 use crate::components::layer::{self, LayerBrush};
 use crate::components::quad::QuadBrush;
 use crate::components::rich_text::RichTextBrush;
+use crate::components::tiles::HeatBrush;
 use crate::font::{fonts::SugarloafFont, FontLibrary};
 use crate::layout::{RichTextLayout, RootStyle};
 use crate::sugarloaf::graphics::{BottomLayer, Graphics};
@@ -31,6 +32,7 @@ pub struct Sugarloaf<'a> {
     pub background_image: Option<ImageProperties>,
     pub graphics: Graphics,
     filters_brush: Option<FiltersBrush>,
+    heat_brush: Option<HeatBrush>,
 }
 
 #[derive(Debug)]
@@ -160,9 +162,17 @@ impl Sugarloaf<'_> {
             rich_text_brush,
             graphics: Graphics::default(),
             filters_brush: None,
+            heat_brush: None,
         };
 
         Ok(instance)
+    }
+
+    /// Enable the heat equation compute tile (clockssugars RK2 solver)
+    pub fn enable_heat_brush(&mut self) {
+        if self.heat_brush.is_none() {
+            self.heat_brush = Some(HeatBrush::new(&self.ctx));
+        }
     }
 
     #[inline]
@@ -378,6 +388,11 @@ impl Sugarloaf<'_> {
                 let view = frame
                     .texture
                     .create_view(&wgpu::TextureViewDescriptor::default());
+                // Run heat equation compute pass before rendering
+                if let Some(ref heat_brush) = self.heat_brush {
+                    heat_brush.compute(&mut encoder);
+                }
+
                 if let Some(layer) = &self.graphics.bottom_layer {
                     self.layer_brush
                         .prepare(&mut encoder, &mut self.ctx, &[&layer.data]);
